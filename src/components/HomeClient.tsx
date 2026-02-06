@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import axios from "axios";
 
 function HomeClient({ email }: { email: string }) {
   const handleLogin = () => {
@@ -33,6 +34,16 @@ function HomeClient({ email }: { email: string }) {
       desc: "Your customers get instant support 24/7.",
     },
   ];
+
+  const handleLogout = async () => {
+    try {
+      const result = await axios.get("/api/auth/logout");
+
+      window.location.href = "/";
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-white to-zinc-50 text-zinc-900 overflow-x-hidden">
@@ -69,7 +80,10 @@ function HomeClient({ email }: { email: string }) {
                     <button className="w-full text-left px-4 py-3 text-sm hover:bg-zinc-100">
                       Dashboard
                     </button>
-                    <button className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-zinc-100">
+                    <button
+                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-zinc-100"
+                      onClick={handleLogout}
+                    >
                       Logout
                     </button>
                   </motion.div>
