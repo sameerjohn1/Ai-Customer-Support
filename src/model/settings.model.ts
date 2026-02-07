@@ -8,10 +8,10 @@ interface ISettings{
 }
 
 const settingsSchema=new Schema<ISettings>({
-    ownerId:{type:String,required:true},
-    businessName:{type:String,required:true},
-    supportEmail:{type:String,required:true},
-    knowledge:{type:String,required:true},
+    ownerId:{type:String,required:true,unique:true},
+    businessName:{type:String},
+    supportEmail:{type:String},
+    knowledge:{type:String},
 
 
 },{timestamps:true})
