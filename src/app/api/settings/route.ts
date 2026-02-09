@@ -21,3 +21,5 @@ export async function POST(req:NextRequest){
           return NextResponse.json({message:`Settings Error ${error}`},{status:500})
     }
 }
+
+
