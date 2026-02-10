@@ -73,6 +73,7 @@ function DashboardClient({ ownerId }: { ownerId: string }) {
           <button
             className="px-4 py-2 rounded-lg border
           border-zinc-300 text-sm hover:bg-zinc-100 transition"
+            onClick={() => navigate.push("/embed")}
           >
             Embed Chatbot
           </button>
