@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-function HomeClient({ email }: { email: string }) {
+function HomeClient({ email }: { email: string | undefined | null }) {
   const [loading, setLoading] = useState(false);
   const handleLogin = () => {
     setLoading(true);
