@@ -27,7 +27,8 @@ function DashboardClient({ ownerId }: { ownerId: string }) {
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
-      }, 3000);
+        navigate.push("/embed");
+      }, 1000);
     } catch (error) {
       console.log(error);
       setLoading(false);
