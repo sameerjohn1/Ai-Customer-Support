@@ -2,12 +2,55 @@
   const api_Url = "https://ai-customer-support-b4dw.vercel.app/api/chat";
 
   const scriptTag = document.currentScript;
-  const ownerId = scriptTag.getAttribute("data-owner-id");
+  const ownerId = scriptTag?.getAttribute("data-owner-id");
 
   if (!ownerId) {
     console.log("Owner id not found");
     return;
   }
+
+  // Inject CSS styles for animations & recommendation chips
+  const style = document.createElement("style");
+  style.innerHTML = `
+    @keyframes botPulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .bot-typing-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 2px;
+    }
+    .bot-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #4b5563;
+      border-radius: 50%;
+      animation: botPulse 1.4s infinite ease-in-out both;
+    }
+    .bot-dot:nth-child(1) { animation-delay: -0.32s; }
+    .bot-dot:nth-child(2) { animation-delay: -0.16s; }
+    .bot-recommendation-chip {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      white-space: nowrap;
+    }
+    .bot-recommendation-chip:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+      color: #111827;
+      transform: translateY(-1px);
+    }
+  `;
+  document.head.appendChild(style);
 
   const button = document.createElement("div");
   button.innerHTML = "🗨️";
@@ -37,29 +80,30 @@
     position: "fixed",
     bottom: "90px",
     right: "24px",
-    width: "320px",
-    height: "420px",
+    width: "330px",
+    height: "450px",
     background: "#fff",
-    borderRadius: "14px",
+    borderRadius: "16px",
     boxShadow: "0 25px 60px rgba(0,0,0,0.25)",
     display: "none",
     flexDirection: "column",
     overflow: "hidden",
     zIndex: "999999",
-    fontFamily: "Inter, system-ui, sans-serif",
+    fontFamily: "Inter, system-ui, -apple-system, sans-serif",
   });
 
   box.innerHTML = `<div style="
   background:#000;
   color:#fff;
-  padding:12px 14px;
+  padding:14px 16px;
   font-size:14px;
+  font-weight:600;
   display:flex;
-  justify-content:space-between;
+  justify-space-between;
   align-items:center;
   " >
   <span>Customer Support</span>
-  <span id='chat-close' style='cursor:pointer';font-size=16px >❌</span>
+  <span id='chat-close' style='cursor:pointer; font-size:16px;' >❌</span>
   </div>
   
   <div id='chat-messages' style='
@@ -68,41 +112,44 @@
   overflow-y:auto;
   background:#f9fafb;
   display:flex;
-  flex-direction:column
+  flex-direction:column;
+  gap:8px;
   '></div>
-
 
   <div style='
   display:flex;
   border-top:1px solid #e5e7eb;
-  padding:8px;
-  gap:6px
+  padding:10px;
+  gap:8px;
+  background:#fff;
   ' >
   <input id='chat-input' type='text' 
   style='
   flex:1;
-  padding:8px 10px;
+  padding:9px 12px;
   border:1px solid #d1d5db;
   border-radius:8px;
-  font-size:12px;
+  font-size:12.5px;
   outline:none;
+  transition: border-color 0.2s;
   ' 
-  placeholder='Type a message' />
+  placeholder='Type a message (Press Enter to send)...' />
 <button
   id="chat-send"
   style="
-    padding:8px 12px;
+    padding:9px 14px;
     border:none;
     background:#000;
     color:#fff;
     border-radius:8px;
     font-size:13px;
+    font-weight:500;
     cursor:pointer;
+    transition: opacity 0.2s;
   "
 >
-  send
+  Send
 </button>
-
   </div>
   `;
 
@@ -110,6 +157,9 @@
 
   button.onclick = () => {
     box.style.display = box.style.display === "none" ? "flex" : "none";
+    if (box.style.display === "flex") {
+      input.focus();
+    }
   };
 
   document.querySelector("#chat-close").onclick = () => {
@@ -120,43 +170,120 @@
   const sendBtn = document.querySelector("#chat-send");
   const messageArea = document.querySelector("#chat-messages");
 
+  const recommendations = [
+    "🚚 Delivery time & charges?",
+    "💳 Cash on Delivery available?",
+    "🔄 Return & Refund policy?",
+    "📧 How to contact support?",
+  ];
+
   function addMessage(text, from) {
     const bubble = document.createElement("div");
     bubble.innerHTML = text;
     Object.assign(bubble.style, {
-      maxWidth: "78%",
-      padding: "8px 12px",
+      maxWidth: "80%",
+      padding: "9px 13px",
       borderRadius: "14px",
       fontSize: "13px",
-      lineHeight: "1.4",
-      marginBottom: "8px",
+      lineHeight: "1.45",
       alignSelf: from === "user" ? "flex-end" : "flex-start",
       background: from === "user" ? "#000" : "#e5e7eb",
       color: from === "user" ? "#fff" : "#111",
-
-      // bubble direction polish
       borderTopRightRadius: from === "user" ? "4px" : "14px",
       borderTopLeftRadius: from === "user" ? "14px" : "4px",
+      wordBreak: "break-word",
     });
 
     messageArea.appendChild(bubble);
     messageArea.scrollTop = messageArea.scrollHeight;
+    return bubble;
   }
 
-  sendBtn.onclick = async () => {
-    const text = input.value.trim();
-    if (!text) return;
-    addMessage(text, "user");
-    input.value = "";
+  function renderWelcomeAndRecommendations() {
+    addMessage("👋 Hi! How can I help you today?", "ai");
 
-    const typing = document.createElement("div");
-    typing.innerHTML = "Typing...";
-    Object.assign(typing.style, {
-      fontSize: "12px",
-      color: "#6b7280",
+    const recContainer = document.createElement("div");
+    recContainer.id = "chat-recommendations";
+    Object.assign(recContainer.style, {
+      display: "flex",
+      flexDirection: "column",
+      gap: "6px",
+      marginTop: "4px",
       marginBottom: "8px",
       alignSelf: "flex-start",
+      maxWidth: "100%",
     });
+
+    const label = document.createElement("span");
+    label.innerText = "💡 Suggested questions:";
+    Object.assign(label.style, {
+      fontSize: "11px",
+      color: "#6b7280",
+      fontWeight: "500",
+      marginLeft: "2px",
+    });
+    recContainer.appendChild(label);
+
+    const chipsWrapper = document.createElement("div");
+    Object.assign(chipsWrapper.style, {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "6px",
+    });
+
+    recommendations.forEach((recText) => {
+      const chip = document.createElement("button");
+      chip.className = "bot-recommendation-chip";
+      chip.innerText = recText;
+      chip.onclick = () => {
+        sendMessage(recText);
+      };
+      chipsWrapper.appendChild(chip);
+    });
+
+    recContainer.appendChild(chipsWrapper);
+    messageArea.appendChild(recContainer);
+    messageArea.scrollTop = messageArea.scrollHeight;
+  }
+
+  // Render initial recommendations
+  renderWelcomeAndRecommendations();
+
+  let isSending = false;
+
+  async function sendMessage(textToSend) {
+    const text = textToSend || input.value.trim();
+    if (!text || isSending) return;
+
+    isSending = true;
+    input.value = "";
+    input.disabled = true;
+    sendBtn.disabled = true;
+    sendBtn.style.opacity = "0.6";
+
+    addMessage(text, "user");
+
+    // Create animated typing indicator
+    const typing = document.createElement("div");
+    Object.assign(typing.style, {
+      padding: "8px 12px",
+      borderRadius: "14px",
+      borderTopLeftRadius: "4px",
+      background: "#e5e7eb",
+      alignSelf: "flex-start",
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "4px",
+    });
+
+    typing.innerHTML = `
+      <div class="bot-typing-dots">
+        <span class="bot-dot"></span>
+        <span class="bot-dot"></span>
+        <span class="bot-dot"></span>
+      </div>
+    `;
+
     messageArea.appendChild(typing);
     messageArea.scrollTop = messageArea.scrollHeight;
 
@@ -174,12 +301,35 @@
 
       const data = await response.json();
       messageArea.removeChild(typing);
-      addMessage(data || "Something went wrong", "ai");
+
+      let reply = "Something went wrong";
+      if (typeof data === "string") {
+        reply = data;
+      } else if (data && data.message) {
+        reply = data.message;
+      }
+
+      addMessage(reply, "ai");
     } catch (error) {
       console.log(error);
-
       messageArea.removeChild(typing);
-      addMessage("Something went wrong", "ai");
+      addMessage("Something went wrong. Please try again later.", "ai");
+    } finally {
+      isSending = false;
+      input.disabled = false;
+      sendBtn.disabled = false;
+      sendBtn.style.opacity = "1";
+      input.focus();
     }
-  };
+  }
+
+  sendBtn.onclick = () => sendMessage();
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
 })();
+
