@@ -101,18 +101,10 @@ function EmbedClient({ ownerId }: { ownerId: string }) {
 
                   <div className="p-3 space-y-2 bg-zinc-50">
                     <div className="bg-zinc-200 text-zinc-800 text-xs px-3 py-2 rounded-lg w-fit">
-                      👋 Hi! How can I help you today?
-                    </div>
-                    <div className="flex flex-wrap gap-1 my-1">
-                      <span className="text-[10px] bg-white border border-zinc-200 text-zinc-600 px-2 py-0.5 rounded-full cursor-pointer hover:bg-zinc-100">
-                        🚚 Delivery time?
-                      </span>
-                      <span className="text-[10px] bg-white border border-zinc-200 text-zinc-600 px-2 py-0.5 rounded-full cursor-pointer hover:bg-zinc-100">
-                        💳 Cash on Delivery?
-                      </span>
+                      hi! how can i help you?
                     </div>
                     <div className="bg-black text-white text-xs px-3 py-2 rounded-lg ml-auto w-fit">
-                      What is the return policy?
+                      what is the return policy?
                     </div>
                   </div>
                 </div>

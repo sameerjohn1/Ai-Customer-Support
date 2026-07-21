@@ -9,7 +9,7 @@
     return;
   }
 
-  // Inject CSS styles for animations & recommendation chips
+  // Inject CSS styles for animations
   const style = document.createElement("style");
   style.innerHTML = `
     @keyframes botPulse {
@@ -31,24 +31,6 @@
     }
     .bot-dot:nth-child(1) { animation-delay: -0.32s; }
     .bot-dot:nth-child(2) { animation-delay: -0.16s; }
-    .bot-recommendation-chip {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      color: #374151;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 11.5px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      white-space: nowrap;
-    }
-    .bot-recommendation-chip:hover {
-      background: #f3f4f6;
-      border-color: #d1d5db;
-      color: #111827;
-      transform: translateY(-1px);
-    }
   `;
   document.head.appendChild(style);
 
@@ -99,7 +81,7 @@
   font-size:14px;
   font-weight:600;
   display:flex;
-  justify-space-between;
+  justify-content:space-between;
   align-items:center;
   " >
   <span>Customer Support</span>
@@ -170,13 +152,6 @@
   const sendBtn = document.querySelector("#chat-send");
   const messageArea = document.querySelector("#chat-messages");
 
-  const recommendations = [
-    "🚚 Delivery time & charges?",
-    "💳 Cash on Delivery available?",
-    "🔄 Return & Refund policy?",
-    "📧 How to contact support?",
-  ];
-
   function addMessage(text, from) {
     const bubble = document.createElement("div");
     bubble.innerHTML = text;
@@ -199,55 +174,8 @@
     return bubble;
   }
 
-  function renderWelcomeAndRecommendations() {
-    addMessage("👋 Hi! How can I help you today?", "ai");
-
-    const recContainer = document.createElement("div");
-    recContainer.id = "chat-recommendations";
-    Object.assign(recContainer.style, {
-      display: "flex",
-      flexDirection: "column",
-      gap: "6px",
-      marginTop: "4px",
-      marginBottom: "8px",
-      alignSelf: "flex-start",
-      maxWidth: "100%",
-    });
-
-    const label = document.createElement("span");
-    label.innerText = "💡 Suggested questions:";
-    Object.assign(label.style, {
-      fontSize: "11px",
-      color: "#6b7280",
-      fontWeight: "500",
-      marginLeft: "2px",
-    });
-    recContainer.appendChild(label);
-
-    const chipsWrapper = document.createElement("div");
-    Object.assign(chipsWrapper.style, {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "6px",
-    });
-
-    recommendations.forEach((recText) => {
-      const chip = document.createElement("button");
-      chip.className = "bot-recommendation-chip";
-      chip.innerText = recText;
-      chip.onclick = () => {
-        sendMessage(recText);
-      };
-      chipsWrapper.appendChild(chip);
-    });
-
-    recContainer.appendChild(chipsWrapper);
-    messageArea.appendChild(recContainer);
-    messageArea.scrollTop = messageArea.scrollHeight;
-  }
-
-  // Render initial recommendations
-  renderWelcomeAndRecommendations();
+  // Initial welcome message
+  addMessage("hi! how can i help you?", "ai");
 
   let isSending = false;
 
@@ -332,4 +260,5 @@
     }
   });
 })();
+
 
